@@ -4174,11 +4174,11 @@ async def _raidegg(message, content):
             now = datetime.datetime.utcnow() + datetime.timedelta(hours=guild_dict[message.channel.guild.id]['configure_dict']['settings']['offset'])
             start = dateparser.parse(raidegg_split[-1], settings={'PREFER_DATES_FROM': 'future'})
             if start.day != now.day:
-                if "m" not in raidegg_split[-1]:
+                if now.hour > 12:
                     start = start + datetime.timedelta(hours=12)
-                start = start.replace(day=now.day)
+                start = start + datetime.timedelta(hours=-24)
             timediff = relativedelta(start, now)
-            raidexp = (timediff.hours*60) + timediff.minutes + 1
+            raidexp = (timediff.hours*60) + timediff.minutes
             if raidexp < 0:
                 await message.channel.send(_('Meowth! Please enter a time in the future.'))
                 return
