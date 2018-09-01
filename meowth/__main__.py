@@ -1334,6 +1334,8 @@ async def join(ctx, *, region_names: str = ''):
     region_info_dict = guild_dict[guild.id]['configure_dict']['regions']['info']
     enabled_roles = set([r.get('role', None) for r in region_info_dict.values()])
     requested_roles = set([r for r in re.split(r'\s*,\s*', region_names.lower().strip()) if r])
+    if not requested_roles:
+        return await channel.send(user_region_list("join", author, enabled_roles))
     valid_requests = requested_roles & enabled_roles
     invalid_requests = requested_roles - enabled_roles
     role_objs = [discord.utils.get(guild.roles, name=role) for role in valid_requests]
@@ -1367,6 +1369,8 @@ async def _leave(ctx, *, region_names: str = ''):
     region_info_dict = guild_dict[guild.id]['configure_dict']['regions']['info']
     enabled_roles = set([r.get('role', None) for r in region_info_dict.values()])
     requested_roles = set([r for r in re.split(r'\s*,\s*', region_names.lower().strip()) if r])
+    if not requested_roles:
+        return await channel.send(user_region_list("leave", author, enabled_roles))
     valid_requests = requested_roles & enabled_roles
     invalid_requests = requested_roles - enabled_roles
     role_objs = [discord.utils.get(guild.roles, name=role) for role in valid_requests]
@@ -1384,6 +1388,22 @@ async def _leave(ctx, *, region_names: str = ''):
     resp = await channel.send(response)
     await asyncio.sleep(10)
     await resp.delete()
+                  
+async def user_region_list(action, author, enabled_roles):
+    response = "Please select one or more regions separated by commas `!region join renton, kent`"
+    if action == "join":
+        list_roles = enabled_roles
+        for role in author.roles:
+            if role in enabled_roles:
+                list_roles.remove(role)
+        response += f"Regions available to join are: {', '.join(list_roles)}"
+    else:
+        list_roles = []
+        for role in author.roles:
+            if role in enabled_roles:
+                list_roles.append(role)
+        response += f"Regions available to leave are: {', '.join(list_roles)}"
+    return await response
 
 @_region.command(name="list")
 async def _list(ctx):
