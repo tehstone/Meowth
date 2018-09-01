@@ -1389,21 +1389,13 @@ async def _leave(ctx, *, region_names: str = ''):
     await asyncio.sleep(10)
     await resp.delete()
                   
-async def user_region_list(action, author, enabled_roles):
+def user_region_list(action, author, enabled_roles):
     response = "Please select one or more regions separated by commas `!region join renton, kent`"
     if action == "join":
-        list_roles = enabled_roles
-        for role in author.roles:
-            if role in enabled_roles:
-                list_roles.remove(role)
-        response += f"Regions available to join are: {', '.join(list_roles)}"
+        response += f"Regions available to join are: {', '.join(set(enabled_roles).difference(roles))}"
     else:
-        list_roles = []
-        for role in author.roles:
-            if role in enabled_roles:
-                list_roles.append(role)
-        response += f"Regions available to leave are: {', '.join(list_roles)}"
-    return await response
+        response += f"Regions available to leave are: {', '.join(set(enabled_roles).intersection(roles))}"
+    return response
 
 @_region.command(name="list")
 async def _list(ctx):
